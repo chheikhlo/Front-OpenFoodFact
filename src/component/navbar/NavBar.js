@@ -7,10 +7,10 @@ const NavBar = () => {
            <Navbar bg="dark" data-bs-theme="dark">
         <Container>
           <Navbar.Brand href="/">Ratatouille</Navbar.Brand>
-          <Nav className="me-auto">
-            <Nav.Link href="/">Accueil</Nav.Link>
+          <Nav className="me-100">
+            <Nav.Link href="/product">Produits</Nav.Link>
             <Nav.Link href="/login">Connexion</Nav.Link>
-            <Nav.Link href="#pricing">Inscription</Nav.Link>
+            <Nav.Link href="/register">Inscription</Nav.Link>
           </Nav>
         </Container>
       </Navbar></>
