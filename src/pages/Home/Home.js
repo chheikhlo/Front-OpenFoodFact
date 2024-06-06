@@ -1,38 +1,18 @@
 import React from 'react';
-import Form from 'react-bootstrap/Form';
-import Card from 'react-bootstrap/Card';
-import Button from 'react-bootstrap/Button';
 import './Home.css';
 import NavBar from '../../component/navbar/NavBar';
+import Footer from '../../component/footer/Footer';
 
 
 const Home = () => {
     return (
         <div className="home">
       <NavBar />
-    <div className='d-flex justify-content-center align-items-center vh-100'> 
-    <Card style={{ width: '60rem' }}>
-                <Card.Header><h2>Substution</h2></Card.Header>
-                <Card.Body>
-                    <Form>
-                        <Form.Group className="mb-3" controlId="category">
-                            <Form.Label>Catégorie</Form.Label>
-                            <Form.Control type="text" placeholder="category"
-                                name='category'
-                             />
-                        </Form.Group>
-                        <Form.Group className="mb-3" controlId="aliment">
-                            <Form.Label>Aliment</Form.Label>
-                            <Form.Control type="text"
-                                placeholder="Aliment à substituer"
-                                name='aliment'
-                             />
-                        </Form.Group>
-                        <Button type='submit' variant="primary">Rechercher</Button>{' '}
-                    </Form>
-                </Card.Body>
-            </Card>
-    </div>
+ 
+        <h4 className='foodHome'>Open Food facts World </h4>
+        <p>Vous pouvez remplacer le produit que  vous voulez en un clic</p>
+      <img src='https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg'  alt='homeImg' className="full-width-half-height"/>
+    <Footer />
 </div>
     );
 }

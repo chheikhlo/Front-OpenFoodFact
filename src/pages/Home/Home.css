@@ -1,3 +1,16 @@
 .home {
-    background-color: rgb(217, 228, 238);
+    width: 100%;
+    background-color: rgb(219, 227, 235);
+}
+.full-width-half-height {
+    width: 86%;
+    height: 67vh; /* 50% de la hauteur de la fenêtre du navigateur */
+    object-fit: cover; /* Pour maintenir le ratio de l'image */
+    margin-bottom: 10px;
+}
+h4 {
+    color: rgb(232, 203, 37);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: 2em;
 }

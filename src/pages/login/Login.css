@@ -1,0 +1,7 @@
+.align-left {
+    align-items: start !important;
+    text-align: left !important;
+}
+Form.Label {
+    text-align: left !important;
+}
