@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Form, Card, Button, Container, Row, Col } from 'react-bootstrap';
-import NavBar from '../../component/navbar/NavBar';
-import Footer from '../../component/footer/Footer';
+import api, { setAuthToken } from "../../services/api";
+import { Form, Card, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from "react-router-dom";
+
 
 const SearchCategory = () => {
     const [categories, setCategories] = useState([]);
@@ -10,12 +10,14 @@ const SearchCategory = () => {
     const [barcode, setBarcode] = useState('');
     const [error, setError] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const navigate = useNavigate();
+
 
     // Récupérer les catégories depuis le backend
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:9000/products/list/categories');
+                const response = await api.get('http://localhost:9000/products/list/categories');
                 setCategories(response.data);
             } catch (error) {
                 console.error('Erreur lors de la récupération des catégories:', error);
@@ -38,11 +40,11 @@ const SearchCategory = () => {
 
             if (barcode) {
                 // Rechercher par code-barres
-                response = await axios.get(`http://localhost:9000/products/code/${barcode}`);
+                response = await api.get(`/products/code/${barcode}`);
                 setSearchResults([response.data]); // Convertir en tableau pour l'affichage uniforme
             } else if (selectedCategory) {
                 // Rechercher par catégorie
-                response = await axios.get(`http://localhost:9000/products/category/${selectedCategory}`);
+                response = await api.get(`/products/category/${selectedCategory}`);
                 setSearchResults(response.data);
             }
 
@@ -53,26 +55,55 @@ const SearchCategory = () => {
         }
     };
 
-    const handleSubstitute = (product) => {
-        if (product.allergens_tags && product.allergens_tags.length > 0) {
-            // Si le produit contient des allergènes, afficher une alerte
-            alert(`Substituer le produit: ${product.product_name} (Allergènes: ${product.allergens_tags.join(', ')})`);
-        } else {
-            // Sinon, indiquer qu'il n'y a pas d'allergènes
-            alert(`Aucun allergène trouvé dans le produit: ${product.product_name}`);
+    const findSubstitute = async (category, currentProduct) => {
+        try {
+            const response = await api.get(`/products/category/${category}`);
+            const productsInCategory = response.data;
+
+            if (productsInCategory.length === 0) {
+                return null;
+            }
+
+            console.log('Produits dans la catégorie:', productsInCategory);
+
+            // Trouver le produit avec le moins d'allergènes
+            let substituteProduct = productsInCategory.reduce((minAllergenProduct, product) => {
+                if (product._id !== currentProduct._id) {
+                    const allergenCount = product.allergens_tags ? product.allergens_tags.length : 0;
+                    const minAllergenCount = minAllergenProduct.allergens_tags ? minAllergenProduct.allergens_tags.length : 0;
+                    return allergenCount < minAllergenCount ? product : minAllergenProduct;
+                }
+                return minAllergenProduct;
+            }, productsInCategory[0]);
+
+            console.log('Produit actuel:', currentProduct);
+            console.log('Produit substitut trouvé:', substituteProduct);
+
+            // Si le produit actuel a moins d'allergènes que tous les autres
+            if (currentProduct.allergens_tags.length <= (substituteProduct.allergens_tags ? substituteProduct.allergens_tags.length : 0)) {
+                return null; // Pas de substitut possible avec moins d'allergènes
+            }
+
+            return substituteProduct;
+        } catch (error) {
+            console.error('Erreur lors de la recherche de substitut:', error);
+            return null;
         }
+    };
+
+    const handleSubstitute = async (product) => {
+        navigate(`/productSubstut/${product._id}/${selectedCategory}`)
     };
 
     return (
         <div>
-            <NavBar />
             <Container className="mt-5 mb-5">
                 <Row className="justify-content-center">
                     <Col lg={8}>
                         <Card>
                             <Card.Header><h2>Substituer un produit</h2></Card.Header>
                             <Card.Body>
-                                {error && <p style={{ color: 'red' }}>{error}</p>}
+                                {error && <Alert variant="danger">{error}</Alert>}
                                 <Form onSubmit={handleSearch}>
                                     <Row className="mb-3">
                                         <Form.Group as={Col} controlId="category">
@@ -106,13 +137,12 @@ const SearchCategory = () => {
                                             {searchResults.map((product) => (
                                                 <Col key={product._id} className="mb-3">
                                                     <Card className="h-100">
+                                                        <Card.Img variant="top" src={product.image_front_small_url} alt="Produit" style={{ height: '150px', objectFit: 'cover' }} />
                                                         <Card.Body>
-                                                        <img src={product.image_front_small_url} alt="Produit" />
-                                                            <Card.Title >{product.product_name}</Card.Title> <br/>
-                                                            <Card.Text>  <br/>
+                                                            <Card.Title>{product.product_name}</Card.Title>
+                                                            <Card.Text>
                                                                 <p>Catégories: {product.categories}</p>
                                                                 <p>Code-barres: {product.code}</p>
-                                                                <p>Ingrédients: {product.ingredients_text}</p>
                                                                 <p>Substance(s) allergique(s): {product.allergens_tags}</p>
                                                                 <p>Magasins disponibles: {product.stores_tags?.join(', ')}</p>
                                                             </Card.Text>
@@ -130,7 +160,6 @@ const SearchCategory = () => {
                     </Col>
                 </Row>
             </Container>
-            <Footer />
         </div>
     );
 }

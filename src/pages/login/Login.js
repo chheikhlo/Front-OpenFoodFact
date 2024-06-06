@@ -1,30 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import NavBar from "../../component/navbar/NavBar";
-import Footer from '../../component/footer/Footer';
 import "./Login.css";
+import api, { setAuthToken } from "../../services/api";
+import { UserContext } from '../../context/AuthContext';
 
 const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const [ user, setUser ] = useContext(UserContext);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:9000/user/login', {
+            const response = await api.post('http://localhost:9000/user/login', {
                 email: email,
                 mot_de_passe: password
             });
 
             if (response.status === 200) {
                 console.log('Connexion réussie:', response.data);
+                setUser(response.data);
+                console.log(user);
+                sessionStorage.setItem('USER', JSON.stringify(response.data));
+                setAuthToken(response.data.token);
                 navigate('/search-category'); // Redirection vers la page SearchCategory
             }
         } catch (error) {
@@ -44,14 +48,13 @@ const Login = () => {
 
     return (
        <div>
-         <NavBar />
          <div className='d-flex justify-content-center align-items-center mt-5'>
             <Card style={{ width: '30rem' }}>
                 <Card.Header><h2>Connexion</h2></Card.Header>
                 <Card.Body>
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
-                            <Form.Label className="align-left" style={{ textAlign:'left !important' }}>Email</Form.Label>
+                            <Form.Label className="align-left" style={{ width: '30rem' }}>Email</Form.Label>
                             <Form.Control 
                                 type="email" 
                                 placeholder="email@example.com"
@@ -81,7 +84,6 @@ const Login = () => {
                 </Card.Body>
             </Card>
         </div>
-        <Footer/>
        </div>
     )
 } 

@@ -1,47 +1,78 @@
-import React from 'react';
-import { Card, Row, Col, Container } from 'react-bootstrap';
+import React, { useState, useEffect, useContext } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import NavBar from '../../component/navbar/NavBar';
-import Footer from '../../component/footer/Footer';
+import api from "../../services/api";
+import { useParams } from 'react-router-dom';
+import { UserContext } from "../../context/AuthContext";
 
-const products = [
-    { name: 'Produit 1', price: 29.99, image: 'https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg' },
-    { name: 'Produit 2', price: 19.99, image: 'https://biorecherche.fr/wp-content/uploads/2023/06/pexels-jane-doan-1092730.jpg' },
-    { name: 'Produit 3', price: 39.99, image: 'https://psynfinity-formation.com/wp-content/uploads/2023/08/Inteligence-Alimentaire.jpg' },
-    { name: 'Produit 4', price: 49.99, image: 'https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg' },
-    { name: 'Produit 5', price: 59.99, image: 'https://biorecherche.fr/wp-content/uploads/2023/06/pexels-jane-doan-1092730.jpg' },
-    { name: 'Produit 6', price: 69.99, image: 'https://psynfinity-formation.com/wp-content/uploads/2023/08/Inteligence-Alimentaire.jpg' },
-    { name: 'Produit 7', price: 79.99, image: 'https://psynfinity-formation.com/wp-content/uploads/2023/08/Inteligence-Alimentaire.jpg' },
-    { name: 'Produit 8', price: 89.99, image: 'https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg' },
-    { name: 'Produit 1', price: 29.99, image: 'https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg' },
-    { name: 'Produit 2', price: 19.99, image: 'https://biorecherche.fr/wp-content/uploads/2023/06/pexels-jane-doan-1092730.jpg' },
-    { name: 'Produit 3', price: 39.99, image: 'https://psynfinity-formation.com/wp-content/uploads/2023/08/Inteligence-Alimentaire.jpg' },
-    { name: 'Produit 4', price: 49.99, image: 'https://verdictsante.protegez-vous.ca/var/protegez_vous/storage/images/6/4/4/7/5037446-1-fre-CA/manger-sante.jpg' },
-];
 
 const Product = () => {
+    const [foodItems, setFoodItems] = useState([]);
+    const [products, setProducts] = useState([]);
+    const [user, setUser] = useContext(UserContext);
+    
+    const { id } = useParams();
+
+    useEffect(() => {
+        api.get(`/user/get/cart/${user._id}`)
+            .then(resp => {
+                setFoodItems(resp.data);
+                fetchProductDetails(resp.data);
+                console.log(resp.data);
+            })
+            .catch(error => {
+                console.error('Erreur lors de la récupération des substitus :', error);
+            });
+    }, [id]);
+
+    const fetchProductDetails = async (foodItems) => {
+        const productDetailsPromises = foodItems.map(item => api.get(`/products/product-details/${item._id}`));
+        try {
+            const productDetailsResponses = await Promise.all(productDetailsPromises);
+            const productsData = productDetailsResponses.map(resp => resp.data);
+            setProducts(productsData);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des détails des produits :', error);
+        }
+    };
+
+    const handleRemoveFromCart = async (productId) => {
+        await api.delete(`/delete/cart/${user._id}/${productId}`);
+    };
+
     return (
-       <div>
-        <NavBar />
-        <div>
-        <Container>
-            <Row>
-                {products.map((product, index) => (
-                    <Col key={index} xs={10} sm={6} md={4} lg={2} className="mt-5">
-                        <Card>
-                            <Card.Img variant="top" src={product.image} />
-                            <Card.Body>
-                                <Card.Title>{product.name}</Card.Title>
-                                <Card.Text>{product.price.toFixed(2)}€</Card.Text>
-                            </Card.Body>
-                        </Card>
-                    </Col>
-                ))}
-            </Row>
-        </Container>
+        <div className="cart-container">
+            <br/><br/>
+            {products.length > 0 ? (
+                <div className="row justify-content-center">
+                    {products.map((product, index) => (
+                        <div key={index} className="col-md-4 d-flex justify-content-center">
+                            {product.map((producct, innerIndex) => (
+                                <div key={innerIndex} className="card mb-4 shadow-sm" style={{ maxWidth: "300px" }}>
+                                    <img src={producct.image_front_small_url} className="card-img-top img-thumbnail" alt={producct.producct_name} style={{ maxWidth: "200px", maxHeight: "200px" }} />
+                                    <div className="card-body">
+                                        <h5 className="card-title">{producct.producct_name}</h5>
+                                        <p className="card-text">Categories: {producct.categories}</p>
+                                        <p className="card-text">Allergens: {producct.allergens_tags?.join(', ')}</p>
+                                        <p className="card-text">Stores: {producct.stores_tags?.join(', ')}</p>
+                                        <a href={producct.link_page_on_openfoodfacts} className="btn btn-primary">OpenFoodFacts</a>
+                                        <button
+                                            className="btn btn-danger"
+                                            onClick={() => handleRemoveFromCart(foodItems[index]._id)}
+                                        >
+                                            Remove from Cart
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                <div className="alert alert-info" role="alert">
+                    Votre panier est vide.
+                </div>
+            )}
         </div>
-        <div><Footer /></div>
-       </div>
     );
 }
 
