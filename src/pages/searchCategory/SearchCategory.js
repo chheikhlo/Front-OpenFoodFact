@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Form, Card, Button, Container, Row, Col } from 'react-bootstrap';
-import NavBar from '../../component/navbar/NavBar';
-import Footer from '../../component/footer/Footer';
+import api from "../../services/api";
+import { Form, Card, Button, Container, Row, Col, Alert } from 'react-bootstrap';
+import { Link, useNavigate } from "react-router-dom";
 
 const SearchCategory = () => {
     const [categories, setCategories] = useState([]);
@@ -10,12 +9,12 @@ const SearchCategory = () => {
     const [barcode, setBarcode] = useState('');
     const [error, setError] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const navigate = useNavigate();
 
-    // Récupérer les catégories depuis le backend
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:9000/products/list/categories');
+                const response = await api.get('/products/list/categories');
                 setCategories(response.data);
             } catch (error) {
                 console.error('Erreur lors de la récupération des catégories:', error);
@@ -37,42 +36,33 @@ const SearchCategory = () => {
             }
 
             if (barcode) {
-                // Rechercher par code-barres
-                response = await axios.get(`http://localhost:9000/products/code/${barcode}`);
-                setSearchResults([response.data]); // Convertir en tableau pour l'affichage uniforme
+                response = await api.get(`/products/code/${barcode}`);
+                setSearchResults([response.data]);
             } else if (selectedCategory) {
-                // Rechercher par catégorie
-                response = await axios.get(`http://localhost:9000/products/category/${selectedCategory}`);
-                setSearchResults(response.data);
+                response = await api.get(`/products/category/${selectedCategory}`);
+                setSearchResults(response.data.filter(product => product.allergens_tags && product.allergens_tags.length > 0));
             }
 
-            setError(''); // Clear any previous error
+            setError('');
         } catch (error) {
             console.error('Erreur lors de la recherche:', error);
             setError('Erreur lors de la recherche.');
         }
     };
 
-    const handleSubstitute = (product) => {
-        if (product.allergens_tags && product.allergens_tags.length > 0) {
-            // Si le produit contient des allergènes, afficher une alerte
-            alert(`Substituer le produit: ${product.product_name} (Allergènes: ${product.allergens_tags.join(', ')})`);
-        } else {
-            // Sinon, indiquer qu'il n'y a pas d'allergènes
-            alert(`Aucun allergène trouvé dans le produit: ${product.product_name}`);
-        }
+    const handleSubstitute = async (product) => {
+        navigate(`/productSubstut/${product._id}/${selectedCategory}`)
     };
 
     return (
         <div>
-            <NavBar />
             <Container className="mt-5 mb-5">
                 <Row className="justify-content-center">
                     <Col lg={8}>
                         <Card>
                             <Card.Header><h2>Substituer un produit</h2></Card.Header>
                             <Card.Body>
-                                {error && <p style={{ color: 'red' }}>{error}</p>}
+                                {error && <Alert variant="danger">{error}</Alert>}
                                 <Form onSubmit={handleSearch}>
                                     <Row className="mb-3">
                                         <Form.Group as={Col} controlId="category">
@@ -105,18 +95,23 @@ const SearchCategory = () => {
                                         <Row xs={1} md={2} className="g-4">
                                             {searchResults.map((product) => (
                                                 <Col key={product._id} className="mb-3">
-                                                    <Card className="h-100">
+                                                    <Card className="h-100 text-center">
+                                                        <div className="card-body text-center">
+                                                            <Card.Img variant="top" src={product.image_front_small_url} alt="Produit" style={{ maxWidth: '10%', height: 'auto' }} />
+                                                        </div>
                                                         <Card.Body>
-                                                        <img src={product.image_front_small_url} alt="Produit" />
-                                                            <Card.Title >{product.product_name}</Card.Title> <br/>
-                                                            <Card.Text>  <br/>
+                                                            <Card.Title>{product.product_name}</Card.Title>
+                                                            <Card.Text>
                                                                 <p>Catégories: {product.categories}</p>
                                                                 <p>Code-barres: {product.code}</p>
-                                                                <p>Ingrédients: {product.ingredients_text}</p>
                                                                 <p>Substance(s) allergique(s): {product.allergens_tags}</p>
                                                                 <p>Magasins disponibles: {product.stores_tags?.join(', ')}</p>
                                                             </Card.Text>
-                                                            <Button onClick={() => handleSubstitute(product)} variant="danger">Substituer</Button>&nbsp;&nbsp;&nbsp;
+                                                            {barcode && (!product.allergens_tags || product.allergens_tags.length === 0) ? (
+                                                                <div style={{ fontWeight: 'bold', color: 'green', textTransform: 'uppercase' }}>Pas de substituant</div>
+                                                            ) : (
+                                                                <Button onClick={() => handleSubstitute(product)} variant="danger">Substituer</Button>
+                                                            )}
                                                             <Card.Link href={product.link_page_on_openfoodfacts}>Voir plus</Card.Link>
                                                         </Card.Body>
                                                     </Card>
@@ -130,7 +125,6 @@ const SearchCategory = () => {
                     </Col>
                 </Row>
             </Container>
-            <Footer />
         </div>
     );
 }

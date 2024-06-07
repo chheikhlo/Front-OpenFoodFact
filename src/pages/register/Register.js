@@ -3,9 +3,7 @@ import { Link, useNavigate } from "react-router-dom"; // Importer useNavigate
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
-import NavBar from '../../component/navbar/NavBar';
-import axios from 'axios';
-import Footer from '../../component/footer/Footer';
+import api, { setAuthToken } from "../../services/api";
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -25,7 +23,7 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:9000/user/register', formData);
+            const response = await api.post('/user/register', formData);
             console.log(response.data);
             // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
             navigate('/login'); // Utiliser navigate pour rediriger vers '/login'
@@ -37,7 +35,6 @@ const Register = () => {
 
     return (
         <>
-            <NavBar />
             <div className='d-flex justify-content-center align-items-center mt-4'>
                 <Card style={{ width: '30rem' }}>
                     <Card.Header><h2>Inscription</h2></Card.Header>
@@ -98,7 +95,6 @@ const Register = () => {
                     </Card.Body>
                 </Card>
             </div>
-            <Footer/>
         </>
     );
 }
