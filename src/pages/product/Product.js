@@ -3,13 +3,14 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import api from "../../services/api";
 import { useParams } from 'react-router-dom';
 import { UserContext } from "../../context/AuthContext";
+import { Card } from 'react-bootstrap';
 
 
 const Product = () => {
     const [foodItems, setFoodItems] = useState([]);
     const [products, setProducts] = useState([]);
     const [user, setUser] = useContext(UserContext);
-    
+
     const { id } = useParams();
 
     useEffect(() => {
@@ -45,18 +46,19 @@ const Product = () => {
             {products.length > 0 ? (
                 <div className="row justify-content-center">
                     {products.map((product, index) => (
-                        <div key={index} className="col-md-4 d-flex justify-content-center">
+                        <div key={index} className="col-md-4 mb-4 d-flex justify-content-center">
                             {product.map((producct, innerIndex) => (
-                                <div key={innerIndex} className="card mb-4 shadow-sm" style={{ maxWidth: "300px" }}>
-                                    <img src={producct.image_front_small_url} className="card-img-top img-thumbnail" alt={producct.producct_name} style={{ maxWidth: "200px", maxHeight: "200px" }} />
-                                    <div className="card-body">
+                                <div key={innerIndex} className="card shadow-sm" style={{ width: "60rem" }}>
+                                    <div className="card-body text-center ">
+                                        <Card.Img variant="top" src={producct.image_front_small_url} alt="Produit" style={{ maxWidth: '10%', height: 'auto' }} />
+
                                         <h5 className="card-title">{producct.producct_name}</h5>
                                         <p className="card-text">Categories: {producct.categories}</p>
                                         <p className="card-text">Allergens: {producct.allergens_tags?.join(', ')}</p>
                                         <p className="card-text">Stores: {producct.stores_tags?.join(', ')}</p>
-                                        <a href={producct.link_page_on_openfoodfacts} className="btn btn-primary">OpenFoodFacts</a>
+                                        <Card.Link href={producct.link_page_on_openfoodfacts}>Voir plus</Card.Link><br/>
                                         <button
-                                            className="btn btn-danger"
+                                            className="btn btn-danger mt-3 "
                                             onClick={() => handleRemoveFromCart(foodItems[index]._id)}
                                         >
                                             Remove from Cart

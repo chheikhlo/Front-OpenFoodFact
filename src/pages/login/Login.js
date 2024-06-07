@@ -18,7 +18,7 @@ const Login = () => {
         event.preventDefault();
 
         try {
-            const response = await api.post('http://localhost:9000/user/login', {
+            const response = await api.post('/user/login', {
                 email: email,
                 mot_de_passe: password
             });
@@ -55,8 +55,8 @@ const Login = () => {
                     <Form onSubmit={handleSubmit}>
                         <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                             <Form.Label className="align-left" style={{ width: '30rem' }}>Email</Form.Label>
-                            <Form.Control 
-                                type="email" 
+                            <Form.Control
+                                type="email"
                                 placeholder="email@example.com"
                                 required
                                 value={email}
@@ -65,7 +65,7 @@ const Login = () => {
                         </Form.Group>
                         <Form.Group className="mb-3" controlId="formPlaintextPassword">
                             <Form.Label className="text-left">Mot de passe</Form.Label>
-                            <Form.Control 
+                            <Form.Control
                                 type="password"
                                 placeholder="votre mot de passe"
                                 required
@@ -86,5 +86,5 @@ const Login = () => {
         </div>
        </div>
     )
-} 
+}
 export default Login;

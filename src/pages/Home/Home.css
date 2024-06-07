@@ -1,16 +1,33 @@
 .home {
+    justify-content: center;
+    align-items: center;
     width: 100%;
     background-color: rgb(219, 227, 235);
 }
 .full-width-half-height {
     width: 86%;
-    height: 67vh; /* 50% de la hauteur de la fenêtre du navigateur */
-    object-fit: cover; /* Pour maintenir le ratio de l'image */
+    height: 67vh;
+    object-fit: cover;
     margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(43, 42, 42, 0.1);
+    margin: 0 100px;
 }
-h4 {
+.foodHome{
+    display: flex;
+    justify-content: center;
+    align-items: center;
     color: rgb(232, 203, 37);
     font-family: Georgia, 'Times New Roman', Times, serif;
     font-weight: bold;
     font-size: 2em;
+}
+.para {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-weight: bold;
+    font-size: 1.2em;
+
 }

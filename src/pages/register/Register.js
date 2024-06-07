@@ -23,7 +23,7 @@ const Register = () => {
         e.preventDefault();
 
         try {
-            const response = await api.post('http://localhost:9000/user/register', formData);
+            const response = await api.post('/user/register', formData);
             console.log(response.data);
             // Rediriger l'utilisateur vers la page de connexion après l'inscription réussie
             navigate('/login'); // Utiliser navigate pour rediriger vers '/login'

@@ -1,7 +1,8 @@
 import { Container, Nav, Navbar, Button } from "react-bootstrap";
 import React, {useContext} from "react";
 import { UserContext } from "../../context/AuthContext";
-import { FaShoppingCart, FaUser, FaSignOutAlt, FaCog } from 'react-icons/fa';
+import { FaShoppingCart, FaUser, FaSignOutAlt } from 'react-icons/fa';
+import { TbAB2 } from "react-icons/tb";
 
 const NavBar = () => {
     const [user, setUser] = useContext(UserContext);
@@ -26,7 +27,15 @@ const NavBar = () => {
                 <></>
             }
             {user ?
-                <Nav.Link to={'/'} onClick={logout} className="nav-link"><FaSignOutAlt /> Se Deconnecter</Nav.Link> :
+                <div>
+                    <Nav.Link href="/search-category">
+                        <TbAB2 />Substituer
+                    </Nav.Link>
+                </div> :
+                <></>
+            }
+            {user ?
+                <Nav.Link href="/" onClick={logout} className="nav-link"><FaSignOutAlt /> Se Deconnecter</Nav.Link> :
                 <Nav.Link href="/login"><FaUser />Connexion</Nav.Link>
             }
             {user ?
@@ -37,5 +46,5 @@ const NavBar = () => {
         </Container>
       </Navbar></>
     )
-} 
+}
 export default NavBar;
